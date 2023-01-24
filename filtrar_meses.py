@@ -61,3 +61,44 @@ def count_sum_group_by_month_by_category(df: pd.DataFrame, date_col: str, count_
     except Exception as e:
         print(f'An error occurred: {e}')
         return None
+    
+
+def count_sum_group_by_month_year_category(df: pd.DataFrame, date_col: str, count_col: str, category_col: str = 'Categoria', language: str='pt_BR', months: list = None, years: list = None) -> Union[pd.DataFrame, None]:
+    try:
+    # Set the locale
+        locale.setlocale(locale.LC_TIME, f'{language}.utf8')
+        
+        # Filter dataframe by month and year if specified
+        if months or years:
+            # Verify if the month of the date are in the month input and return a Boolean to apply a mask later
+            condition_month = df[date_col].apply(lambda date: date.strftime("%b").upper() in months if months else True)
+            condition_years = df[date_col].apply(lambda date: date.year in years if years else True)
+            
+            mask = condition_month & condition_years
+            df = df[mask]
+            
+        # Get a list of unique categories
+        categories = df[category_col].unique()
+
+        # Extract the month names from the dates columns, transform to abreviations with 3 uppercases uniques letters 
+        month_names_index = df[date_col].apply(lambda x: month_abbr[x.month].upper()).unique()
+        
+        # Create a new DataFrame with the months as the index
+        result = pd.DataFrame(index = month_names_index, 
+                              columns = categories)
+        
+        # Fill the new DataFrame with the count of students for each month and category
+        for category in categories:
+            mask = df[category_col] == category
+            
+            take_the_mouth_of_the_date = df[date_col].apply(lambda x: month_abbr[x.month].upper())
+            
+            temp_df = df[mask].groupby(take_the_mouth_of_the_date)[count_col].sum()
+            
+            result[category] = temp_df
+            
+        return result.fillna(0).astype(int)
+    
+    except Exception as e:
+        print(f'An error occurred: {e}')
+        return None

@@ -21,13 +21,18 @@ st.dataframe(pd_dados_com_date)
 
 # Obter os meses do ano
 meses = [item.upper() for item in calendar.month_abbr]
+anos = pd_dados_com_date['Data'].apply(lambda data: data.year).unique()
+
 
 # Criar o multiselect do filtro
 multiselect_meses = st.sidebar.multiselect(
     "Filtro de meses",
     tuple(meses)
 )
-
+multiselect_years = st.sidebar.multiselect(
+    "Filtro de Anos",
+    tuple(anos)
+)
 # Criar um groupby passando a coluna para filtrar, a coluna para somar e os critérios
 monthly_group = fm.count_sum_group_by_month(pd_dados_com_date, 'Data', 'Contagem', months=multiselect_meses)
 
@@ -42,6 +47,13 @@ col2.bar_chart(monthly_group)
 filt_soma_alunos = fm.count_sum_group_by_month_by_category(pd_dados_com_date, 'Data', 'Contagem',months=multiselect_meses)
 
 st.dataframe(filt_soma_alunos)
+
+filter_students_sum_year_month = fm.count_sum_group_by_month_year_category(pd_dados_com_date, 'Data', 'Contagem',months=multiselect_meses, years=multiselect_years)
+
+st.bar_chart(filter_students_sum_year_month)
+
+
+
 
 
 
