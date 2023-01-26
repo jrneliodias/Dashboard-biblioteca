@@ -5,6 +5,7 @@ from calendar import month_abbr
 from filtrar_meses import *
 from Limpeza_dados import *
 from filtro_completo import filter_dataframe
+import plotly.express as px
 
 st.set_page_config(layout="wide")
 st.header("DASHBOARD")
@@ -15,7 +16,9 @@ pd_dados_date = limpar_dados(file_path='Banco_de_Dados.csv',
                              columns_to_drop=['Mês', 'Ano'])
 
 # Exibir tabela
-st.dataframe(pd_dados_date)   
+st.checkbox("Expandir Tabela", value=False, key="use_container_width")
+
+st.dataframe(pd_dados_date,use_container_width=st.session_state.use_container_width)   
 
 # Obter os meses do ano
 meses = [item.upper() for item in month_abbr]
@@ -38,7 +41,7 @@ monthly_group = count_sum_group_by_month(pd_dados_date, 'Data', 'Contagem', mont
 st.markdown('### Total de usuários por mês')
 col1, col2 = st.columns([1, 3])
 
-col1.dataframe(monthly_group) 
+col1.dataframe(monthly_group,use_container_width=True) 
 col2.bar_chart(monthly_group)
 
 '### Filtro de soma de alunos por Categoria'
@@ -49,6 +52,13 @@ col3, col4 = st.columns([1, 3])
 col3.dataframe(filt_soma_alunos)
 col4.bar_chart(filter_students_sum_year_month)
 
+fig = px.histogram(filter_students_sum_year_month, x=filter_students_sum_year_month.index,
+                   y=filter_students_sum_year_month.columns,
+                   barmode='group',
+                   text_auto='.2s',
+                    )
+
+st.plotly_chart(fig, theme="streamlit", use_container_width=True)
 
 
 #st.dataframe(filter_dataframe(df))
